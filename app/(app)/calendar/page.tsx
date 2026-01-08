@@ -30,6 +30,7 @@ export default function CalendarPage() {
   const grid = getMonthGrid(currentMonth);
 
   const loadMonth = async () => {
+    if (!supabase) return;
     const first = getISODate(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1));
     const last = getISODate(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0));
     const { data } = await supabase
@@ -41,6 +42,7 @@ export default function CalendarPage() {
   };
 
   const loadDayDetails = async (date: string) => {
+    if (!supabase) return;
     const [entriesResult, obligationsResult] = await Promise.all([
       supabase
         .from("time_entries")

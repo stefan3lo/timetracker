@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleAuth = async (mode: "signin" | "signup") => {
+    if (!supabase) {
+      setMessage("Supabase is not configured.");
+      return;
+    }
     setLoading(true);
     setMessage(null);
-    const supabase = createSupabaseBrowserClient();
     const result =
       mode === "signin"
         ? await supabase.auth.signInWithPassword({ email, password })

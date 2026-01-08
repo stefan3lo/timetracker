@@ -42,6 +42,7 @@ export default function InsightsPage() {
   };
 
   const loadInsights = async () => {
+    if (!supabase) return;
     const { start, end } = resolveRange();
     const [scoresResult, entriesResult] = await Promise.all([
       supabase

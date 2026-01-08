@@ -49,7 +49,19 @@ export default function SettingsPage() {
   });
   const [userId, setUserId] = useState<string | null>(null);
 
+  const requireSupabase = () => {
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return null;
+    }
+    return supabase;
+  };
+
   const loadSettings = async () => {
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     const userResult = await supabase.auth.getUser();
     const [areasResult, projectsResult, tasksResult, templatesResult, settingsResult] = await Promise.all([
       supabase.from("areas").select("id,name").order("created_at", { ascending: true }),
@@ -78,6 +90,10 @@ export default function SettingsPage() {
 
   const addArea = async () => {
     if (!newArea) return;
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("areas").insert({ name: newArea });
     setNewArea("");
     setToast("Area created.");
@@ -86,6 +102,10 @@ export default function SettingsPage() {
 
   const addProject = async () => {
     if (!newProject) return;
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("projects").insert({ name: newProject, area_id: areas[0]?.id ?? null });
     setNewProject("");
     setToast("Project created.");
@@ -94,6 +114,10 @@ export default function SettingsPage() {
 
   const addTask = async () => {
     if (!newTask) return;
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("tasks").insert({ title: newTask, project_id: projects[0]?.id ?? null });
     setNewTask("");
     setToast("Task created.");
@@ -102,6 +126,10 @@ export default function SettingsPage() {
 
   const saveSettings = async () => {
     if (!userId) return;
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("user_settings").upsert({ user_id: userId, ...settings });
     setToast("Settings saved.");
     loadSettings();
@@ -109,6 +137,10 @@ export default function SettingsPage() {
 
   const createTemplate = async () => {
     if (!templateDraft.title) return;
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("obligation_templates").insert({
       title: templateDraft.title,
       frequency: templateDraft.frequency,
@@ -137,6 +169,10 @@ export default function SettingsPage() {
   };
 
   const unlockDay = async () => {
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("daily_scores").update({ locked: false }).eq("date", unlockDate);
     setToast("Day unlocked.");
   };
@@ -163,7 +199,9 @@ export default function SettingsPage() {
                         confirmLabel: "Delete",
                         action: async () => {
                           setConfirm(null);
-                          await supabase.from("areas").delete().eq("id", area.id);
+                          const client = requireSupabase();
+                          if (!client) return;
+                          await client.from("areas").delete().eq("id", area.id);
                           setToast("Area deleted.");
                           loadSettings();
                         },
@@ -184,7 +222,9 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   onClick={async () => {
-                    await supabase.from("areas").update({ name: area.name }).eq("id", area.id);
+                    const client = requireSupabase();
+                    if (!client) return;
+                    await client.from("areas").update({ name: area.name }).eq("id", area.id);
                     setToast("Area updated.");
                   }}
                 >
@@ -223,7 +263,9 @@ export default function SettingsPage() {
                         confirmLabel: "Delete",
                         action: async () => {
                           setConfirm(null);
-                          await supabase.from("projects").delete().eq("id", project.id);
+                          const client = requireSupabase();
+                          if (!client) return;
+                          await client.from("projects").delete().eq("id", project.id);
                           setToast("Project deleted.");
                           loadSettings();
                         },
@@ -264,7 +306,9 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   onClick={async () => {
-                    await supabase
+                    const client = requireSupabase();
+                    if (!client) return;
+                    await client
                       .from("projects")
                       .update({ name: project.name, area_id: project.area_id })
                       .eq("id", project.id);
@@ -310,7 +354,9 @@ export default function SettingsPage() {
                         confirmLabel: "Delete",
                         action: async () => {
                           setConfirm(null);
-                          await supabase.from("tasks").delete().eq("id", task.id);
+                          const client = requireSupabase();
+                          if (!client) return;
+                          await client.from("tasks").delete().eq("id", task.id);
                           setToast("Task deleted.");
                           loadSettings();
                         },
@@ -351,7 +397,9 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   onClick={async () => {
-                    await supabase
+                    const client = requireSupabase();
+                    if (!client) return;
+                    await client
                       .from("tasks")
                       .update({ title: task.title, project_id: task.project_id })
                       .eq("id", task.id);
@@ -479,7 +527,9 @@ export default function SettingsPage() {
                         confirmLabel: "Delete",
                         action: async () => {
                           setConfirm(null);
-                          await supabase.from("obligation_templates").delete().eq("id", template.id);
+                          const client = requireSupabase();
+                          if (!client) return;
+                          await client.from("obligation_templates").delete().eq("id", template.id);
                           setToast("Template deleted.");
                           loadSettings();
                         },

@@ -41,6 +41,10 @@ export default function PlanPage() {
   }, [topTasks]);
 
   const loadPlan = async () => {
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     const [tasksResult, planResult, topResult, templateResult, obligationsResult] = await Promise.all([
       supabase.from("tasks").select("id,title").order("created_at", { ascending: true }),
       supabase.from("daily_plans").select("target_minutes,notes").eq("date", date).maybeSingle(),
@@ -94,6 +98,10 @@ export default function PlanPage() {
   };
 
   const savePlan = async () => {
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await supabase.from("daily_plans").delete().eq("date", date);
     await supabase.from("daily_plans").insert({
       date,
@@ -129,6 +137,10 @@ export default function PlanPage() {
   const applyToToday = async () => {
     const today = getISODate();
     if (date !== today) return;
+    if (!supabase) {
+      setToast("Supabase is not configured.");
+      return;
+    }
     await savePlan();
     setToast("Plan applied to today.");
   };

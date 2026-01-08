@@ -79,6 +79,10 @@ export default function TodayPage() {
       : tasks.filter((task) => task.project_id === selectedProjectId);
 
   const loadData = useCallback(async () => {
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const [
       tasksResult,
       projectsResult,
@@ -201,8 +205,20 @@ export default function TodayPage() {
     return new Set(topTasks.map((item) => item.task_id).filter(Boolean));
   }, [topTasks]);
 
+  const requireSupabase = () => {
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return null;
+    }
+    return supabase;
+  };
+
   const handleStart = async () => {
     if (!selectedTaskId || locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const response = await fetch("/api/timer/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -220,6 +236,10 @@ export default function TodayPage() {
 
   const handlePause = async () => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const response = await fetch("/api/timer/pause", { method: "POST" });
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}));
@@ -233,6 +253,10 @@ export default function TodayPage() {
 
   const handleResume = async () => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const response = await fetch("/api/timer/resume", { method: "POST" });
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}));
@@ -246,6 +270,10 @@ export default function TodayPage() {
 
   const handleStop = async () => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const response = await fetch("/api/timer/stop", { method: "POST" });
     if (!response.ok) {
       const payload = await response.json().catch(() => ({}));
@@ -259,6 +287,10 @@ export default function TodayPage() {
 
   const handleCreateTask = async () => {
     if (!newTaskTitle) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     let projectId = selectedProjectId === "all" ? null : selectedProjectId;
     if (!projectId && newProjectName) {
       const { data: project } = await supabase
@@ -281,6 +313,10 @@ export default function TodayPage() {
   };
 
   const updateChecklist = async (id: string, done: boolean) => {
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     await supabase.from("obligation_instances").update({ done }).eq("id", id);
     setToast({ message: "Checklist updated." });
     await loadData();
@@ -288,6 +324,10 @@ export default function TodayPage() {
 
   const setTopTask = async (rank: number, taskId: string) => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     if (taskId && selectedHighlightIds.has(taskId)) {
       setToast({ message: "Task is already highlighted.", type: "error" });
       return;
@@ -302,6 +342,10 @@ export default function TodayPage() {
 
   const swapTopTasks = async (fromRank: number, toRank: number) => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     if (fromRank === toRank) return;
     const fromTask = topTasks.find((item) => item.rank === fromRank);
     const toTask = topTasks.find((item) => item.rank === toRank);
@@ -326,6 +370,10 @@ export default function TodayPage() {
 
   const handleEndDay = async () => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const response = await fetch("/api/day/end", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -343,6 +391,10 @@ export default function TodayPage() {
 
   const addHighlightSlot = async () => {
     if (locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const nextRank = highlightCount + 1;
     await supabase.from("daily_plan_top_tasks").insert({ date: today, rank: nextRank, task_id: null });
     setHighlightCount(nextRank);
@@ -351,6 +403,10 @@ export default function TodayPage() {
 
   const handleUnlockDay = async () => {
     if (!locked) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     await supabase.from("daily_scores").update({ locked: false }).eq("date", today);
     setToast({ message: "Day unlocked." });
     await loadData();
@@ -358,6 +414,10 @@ export default function TodayPage() {
 
   const handleRenameTask = async () => {
     if (!selectedTaskId || !editTitle.trim()) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     await supabase.from("tasks").update({ title: editTitle.trim() }).eq("id", selectedTaskId);
     setToast({ message: "Task renamed." });
     await loadData();
@@ -372,6 +432,10 @@ export default function TodayPage() {
 
   const saveEntryEdits = async () => {
     if (!editingEntry) return;
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     const start = new Date(editingEntry.start_at);
     const [year, month, day] = editEntryDate.split("-").map(Number);
     if (!year || !month || !day) return;
@@ -392,6 +456,10 @@ export default function TodayPage() {
   };
 
   const deleteEntry = async (entryId: string) => {
+    if (!supabase) {
+      setActionError("Supabase is not configured.");
+      return;
+    }
     await supabase.from("time_entries").delete().eq("id", entryId);
     setToast({ message: "Entry deleted." });
     await loadData();
@@ -636,7 +704,9 @@ export default function TodayPage() {
                         description: "This removes the task highlight slot.",
                         confirmLabel: "Remove",
                         action: async () => {
-                          await supabase
+                          const client = requireSupabase();
+                          if (!client) return;
+                          await client
                             .from("daily_plan_top_tasks")
                             .delete()
                             .eq("date", today)
