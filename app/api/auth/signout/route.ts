@@ -3,7 +3,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
-  await supabase.auth.signOut();
+  if (supabase) {
+    await supabase.auth.signOut();
+  }
   const origin = request.headers.get("origin") ?? "http://localhost:3000";
   return NextResponse.redirect(new URL("/login", origin));
 }
