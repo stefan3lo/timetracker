@@ -33,7 +33,7 @@ type TimeEntry = {
   start_at: string;
   end_at: string;
   duration_sec: number;
-  tasks: { title: string } | null;
+  tasks: unknown;
 };
 
 export default function TodayPage() {
@@ -761,7 +761,10 @@ export default function TodayPage() {
                       <span className="text-xs text-[var(--accent-2)]">
                         {Math.round(entry.duration_sec / 60)}m
                       </span>
-                      <span className="flex-1">{entry.tasks?.title ?? "Unassigned task"}</span>
+                      <span className="flex-1">
+                        {(Array.isArray(entry.tasks) ? entry.tasks[0] : (entry.tasks as any))?.title ??
+                          "Unassigned task"}
+                      </span>
                       <Button
                         variant="outline"
                         onClick={() => startEditingEntry(entry)}
