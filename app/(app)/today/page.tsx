@@ -24,7 +24,7 @@ type TopTask = { id: string; task_id: string | null; rank: number };
 type ObligationInstance = {
   id: string;
   done: boolean;
-  obligation_templates: { title: string; target_type: string; target_value: number } | null;
+  obligation_templates: unknown;
 };
 
 type TimeEntry = {
@@ -552,26 +552,30 @@ export default function TodayPage() {
             {checklist.length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">No obligations for today.</p>
             ) : (
-              checklist.map((item) => (
-                <label
-                  key={item.id}
-                  className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-sm"
-                >
-                  <span>
-                    {item.obligation_templates?.title ?? "Untitled obligation"}
-                    <span className="ml-2 text-xs text-[var(--text-muted)]">
-                      {item.obligation_templates?.target_type ?? "checkbox"}{" "}
-                      {item.obligation_templates?.target_value ?? ""}
+              checklist.map((item) => {
+                const template = Array.isArray(item.obligation_templates)
+                  ? item.obligation_templates[0]
+                  : (item.obligation_templates as any);
+                return (
+                  <label
+                    key={item.id}
+                    className="flex items-center justify-between rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-sm"
+                  >
+                    <span>
+                      {template?.title ?? "Untitled obligation"}
+                      <span className="ml-2 text-xs text-[var(--text-muted)]">
+                        {template?.target_type ?? "checkbox"} {template?.target_value ?? ""}
+                      </span>
                     </span>
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={item.done}
-                    onChange={(event) => updateChecklist(item.id, event.target.checked)}
-                    className="h-4 w-4 accent-[var(--accent)]"
-                  />
-                </label>
-              ))
+                    <input
+                      type="checkbox"
+                      checked={item.done}
+                      onChange={(event) => updateChecklist(item.id, event.target.checked)}
+                      className="h-4 w-4 accent-[var(--accent)]"
+                    />
+                  </label>
+                );
+              })
             )}
           </div>
           <div className="space-y-3">
