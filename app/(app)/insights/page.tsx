@@ -20,7 +20,7 @@ import { getISODate } from "@/lib/utils";
 type DailyScore = { date: string; worked_minutes: number };
 type TimeEntry = {
   duration_sec: number;
-  tasks: { title: string; projects: { name: string; areas: { name: string } | null } | null } | null;
+  tasks: unknown;
 };
 
 export default function InsightsPage() {
@@ -71,12 +71,19 @@ export default function InsightsPage() {
     const totals: Record<string, number> = {};
     timeEntries.forEach((entry) => {
       const minutes = Math.round((entry.duration_sec ?? 0) / 60);
+      const taskRecord = Array.isArray(entry.tasks) ? entry.tasks[0] : (entry.tasks as any);
+      const projectRecord = Array.isArray(taskRecord?.projects)
+        ? taskRecord?.projects[0]
+        : taskRecord?.projects;
+      const areaRecord = Array.isArray(projectRecord?.areas)
+        ? projectRecord?.areas[0]
+        : projectRecord?.areas;
       const label =
         key === "area"
-          ? entry.tasks?.projects?.areas?.name ?? "Unassigned"
+          ? areaRecord?.name ?? "Unassigned"
           : key === "project"
-            ? entry.tasks?.projects?.name ?? "Unassigned"
-            : entry.tasks?.title ?? "Untitled";
+            ? projectRecord?.name ?? "Unassigned"
+            : taskRecord?.title ?? "Untitled";
       totals[label] = (totals[label] ?? 0) + minutes;
     });
     return Object.entries(totals)
