@@ -8,6 +8,10 @@ export async function middleware(request: NextRequest) {
     },
   });
 
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return response;
+  }
+
   const cookieHeader = request.headers.get("cookie") ?? "";
   const parsedCookies = cookieHeader
     .split(";")
