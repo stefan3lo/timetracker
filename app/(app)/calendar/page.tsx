@@ -16,26 +16,7 @@ type DailyScore = {
 
 type TimeEntry = {
   duration_sec: number;
-  tasks:
-    | {
-        title: string;
-        projects:
-          | {
-              name: string;
-              areas: { name: string } | null;
-            }
-          | null;
-      }
-    | Array<{
-        title: string;
-        projects:
-          | {
-              name: string;
-              areas: { name: string } | null;
-            }
-          | null;
-      }>
-    | null;
+  tasks: unknown;
 };
 
 export default function CalendarPage() {
@@ -94,11 +75,14 @@ export default function CalendarPage() {
     const task: Record<string, number> = {};
     selectedEntries.forEach((entry) => {
       const minutes = Math.round((entry.duration_sec ?? 0) / 60);
-      const taskRecord = Array.isArray(entry.tasks) ? entry.tasks[0] : entry.tasks;
+      const taskRecord = Array.isArray(entry.tasks) ? entry.tasks[0] : (entry.tasks as any);
       const projectRecord = Array.isArray(taskRecord?.projects)
         ? taskRecord?.projects[0]
         : taskRecord?.projects;
-      const areaName = projectRecord?.areas?.name ?? "Unassigned";
+      const areaRecord = Array.isArray(projectRecord?.areas)
+        ? projectRecord?.areas[0]
+        : projectRecord?.areas;
+      const areaName = areaRecord?.name ?? "Unassigned";
       const projectName = projectRecord?.name ?? "Unassigned";
       const taskName = taskRecord?.title ?? "Untitled";
       area[areaName] = (area[areaName] ?? 0) + minutes;
