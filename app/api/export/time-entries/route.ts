@@ -13,16 +13,21 @@ export async function GET() {
     .order("start_at", { ascending: true });
 
   const rows =
-    data?.map((entry) => [
-      entry.start_at,
-      entry.end_at,
-      entry.duration_sec,
-      entry.tasks?.title ?? "",
-      entry.tasks?.projects?.name ?? "",
-      entry.tasks?.projects?.areas?.name ?? "",
-      entry.note ?? "",
-      entry.source ?? "",
-    ]) ?? [];
+    data?.map((entry) => {
+      const task = Array.isArray(entry.tasks) ? entry.tasks[0] : (entry.tasks as any);
+      const project = Array.isArray(task?.projects) ? task?.projects[0] : task?.projects;
+      const area = Array.isArray(project?.areas) ? project?.areas[0] : project?.areas;
+      return [
+        entry.start_at,
+        entry.end_at,
+        entry.duration_sec,
+        task?.title ?? "",
+        project?.name ?? "",
+        area?.name ?? "",
+        entry.note ?? "",
+        entry.source ?? "",
+      ];
+    }) ?? [];
 
   const csv = toCsv(
     ["start_at", "end_at", "duration_sec", "task", "project", "area", "note", "source"],
