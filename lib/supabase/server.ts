@@ -34,7 +34,9 @@ export async function createSupabaseServerClient() {
         }
         return parsedCookies;
       },
-      setAll(cookieList) {
+      setAll(
+        cookieList: Array<{ name: string; value: string; options?: Parameters<typeof cookieStore.set>[2] }>
+      ) {
         if (typeof cookieStore.set !== "function") return;
         cookieList.forEach(({ name, value, options }) => {
           cookieStore.set(name, value, options);
