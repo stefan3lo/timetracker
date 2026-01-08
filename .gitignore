@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+Dark UI Design for Second Brain/
 
 # debug
 npm-debug.log*
