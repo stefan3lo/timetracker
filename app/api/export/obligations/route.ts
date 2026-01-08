@@ -13,13 +13,18 @@ export async function GET() {
     .order("date", { ascending: true });
 
   const rows =
-    data?.map((entry) => [
-      entry.date,
-      entry.obligation_templates?.title ?? "",
-      entry.obligation_templates?.target_value ?? "",
-      entry.actual_value ?? "",
-      entry.done ?? false,
-    ]) ?? [];
+    data?.map((entry) => {
+      const template = Array.isArray(entry.obligation_templates)
+        ? entry.obligation_templates[0]
+        : (entry.obligation_templates as any);
+      return [
+        entry.date,
+        template?.title ?? "",
+        template?.target_value ?? "",
+        entry.actual_value ?? "",
+        entry.done ?? false,
+      ];
+    }) ?? [];
 
   const csv = toCsv(["date", "obligation", "target", "actual", "done"], rows);
 
